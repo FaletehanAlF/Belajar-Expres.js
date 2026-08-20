@@ -23,7 +23,6 @@ const sepatu = [
   },
 ]
 
-
 const buah = [
   {
     title: "Jeruk",
@@ -49,8 +48,8 @@ app.get("/api/sepatu", (req: Request,res: Response) => {
 
 app.get("/api/buah", (req: Request,res: Response) => {
   res.status(200).json({
-  message: "Berhasil fetch data sepatu!",
-  data: sepatu
+  message: "Berhasil fetch data buah!",
+  data: buah
   })
  
 })
