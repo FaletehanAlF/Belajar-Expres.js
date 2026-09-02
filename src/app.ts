@@ -1,88 +1,64 @@
-import express, { type Express, type Request, type Response } from 'express';
-import cors from "cors"
-import { title } from 'node:process';
-import * as z from "zod"; 
+import express from "express";
+import db from "./database/index.ts";
+import { productSchema } from "./validators/product.validator.ts";
 
+const app = express();
 
-const app: Express = express();
-const port = 8000;
+app.use(express.json());
 
-app.use(cors ())
+app.post("/products", async (req, res) => {
+  try {
+    const result = productSchema.safeParse(req.body);
 
-const sepatu = [
-  {
-    title: "Nike AiR F1",
-    category: "Kets"
-  },
-   {
-    title: "Puma Speedcat",
-     category: "Kets"
-  },
-   {
-    title: "Adidas Samba",
-    category: "Kets"
+    if (!result.success) {
+      return res.status(400).json({
+        message: "Data tidak valid",
+        errors: result.error.issues,
+      });
+    }
 
-  },
-]
+    const { name, price } = result.data;
 
-const buah = [
-  {
-    title: "Jeruk",
-    color: "orange"
-  },
-   {
-    title: "apel",
-     color: "merah"
-  },
-   {
-    title: "melon",
-    color: "hijau"
+    await db.execute(
+      "INSERT INTO products (name, price) VALUES (?, ?)",
+      [name, price],
+    );
 
-  },
-]
-app.get("/api/sepatu", (req: Request,res: Response) => {
-  res.status(200).json({
-  message: "Berhasil fetch data sepatu!",
-  data: sepatu
-  })
- 
-})
+    res.status(201).json({
+      message: "Product berhasil ditambahkan",
+      data: {
+        name,
+        price,
+      },
+    });
+  } catch (error) {
+    console.error(error);
 
-app.get("/api/buah", (req: Request,res: Response) => {
-  res.status(200).json({
-  message: "Berhasil fetch data buah!",
-  data: buah
-  })
- 
-})
+    res.status(500).json({
+      message: "Terjadi kesalahan pada server",
+    });
+  }
+});
 
-// app.get('/api/products', (req: Request, res: Response) => {
-//     res.status(200).json({
-//         message: "berhasil di tampilkan",
-//         data: [{
-//             name: "sepatu",
-//             category: "kets",
-//             price: 1500000
-//         }]
-//     })
-// });
+app.get("/products", async (req, res) => {
+  try {
+    const [products] = await db.execute(
+      "SELECT * FROM products",
+    );
 
-// app.post("/api/sepatu", (req, res) => {
-//   res.status(201).json({
-//     message: "Product berhasil ditambahkan"
-//   });
-// });
-// app.put("/api/sepatu", (req, res) => {
-//   res.status(200).json({
-//     message: `Product berhasil di update`
-//   });
-// });
-// app.delete("/api/sepatu", (req, res) => {
-//   res.status(204).json({
-//     message: `Product berhasil dihapus`
-//   });
-// });
+    res.status(200).json({
+      message: "Berhasil mengambil data",
+      data: products,
+    });
+  } catch (error) {
+    console.error(error);
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+    res.status(500).json({
+      message: "Terjadi kesalahan pada server",
+    });
+  }
+});
+
+app.listen(8000, () => {
+  console.log("Server berjalan di http://localhost:8000");
 });

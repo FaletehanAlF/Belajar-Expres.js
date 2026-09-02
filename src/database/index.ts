@@ -4,8 +4,8 @@ const db = mysql.createPool({
   host: "localhost",
   user: "root",
   password: "",
-  database: "belajar_express",
-  port: 8000,
+  database: "crud_produk",
+  port: 3306,
 });
 
 export default db;
