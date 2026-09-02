@@ -96,6 +96,27 @@ app.put("/products/:id", async (req, res) => {
   }
 });
 
+app.delete("/products/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    await db.execute(
+      "DELETE FROM products WHERE id = ?",
+      [id],
+    );
+
+    res.status(200).json({
+      message: "Product berhasil dihapus",
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Terjadi kesalahan pada server",
+    });
+  }
+});
+
 app.listen(8000, () => {
   console.log("Server berjalan di http://localhost:8000");
 });
