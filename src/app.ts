@@ -59,6 +59,43 @@ app.get("/products", async (req, res) => {
   }
 });
 
+app.put("/products/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const result = productSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        message: "Data tidak valid",
+        errors: result.error.issues,
+      });
+    }
+
+    const { name, price } = result.data;
+
+    await db.execute(
+      "UPDATE products SET name = ?, price = ? WHERE id = ?",
+      [name, price, id],
+    );
+
+    res.status(200).json({
+      message: "Product berhasil diupdate",
+      data: {
+        id,
+        name,
+        price,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Terjadi kesalahan pada server",
+    });
+  }
+});
+
 app.listen(8000, () => {
   console.log("Server berjalan di http://localhost:8000");
 });
