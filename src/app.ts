@@ -11,7 +11,7 @@ app.post("/products", async (req, res) => {
     const result = productSchema.safeParse(req.body);
 
     if (!result.success) {
-      return res.status(400).json({
+      return res.status(400).json({ 
         message: "Data tidak valid",
         errors: result.error.issues,
       });
